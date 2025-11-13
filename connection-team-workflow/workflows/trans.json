@@ -1,0 +1,78 @@
+{
+  "title": "Ascendion Hospitals – World-Class Healthcare for a Healthier Tomorrow",
+  "website_overview": "A modern, patient-focused hospital website with a clean white-and-blue theme, easy navigation, and an AI-powered audio assistant that explains each section aloud.",
+  "main_goals": [
+    "Build trust and show medical excellence.",
+    "Let users easily book doctor appointments.",
+    "Highlight hospital specialties and centres of excellence.",
+    "Offer interactive audio narration for all sections.",
+    "Provide contact and location details clearly."
+  ],
+  "website_sections": {
+    "1_header": {
+      "details": {
+        "logo_position": "Top Left",
+        "contact": "📞 08069991039",
+        "button": "Book Appointment",
+        "menu": ["Home", "About Us", "Specialties", "Doctors", "Locations", "Contact"]
+      }
+    },
+    "2_hero_section": {
+      "banner_image": "Hospital or doctor image",
+      "headline_text": "Consult Our Trusted Specialists. Book Your Appointment Today.",
+      "elements": ["City Dropdown", "Book Appointment Button"]
+    },
+    "3_centres_of_excellence": {
+      "description": "Show main departments in a grid layout with small icons.",
+      "departments": [
+        "Cardiology",
+        "Orthopedics",
+        "Oncology",
+        "Neurology",
+        "Nephrology",
+        "Gastroenterology",
+        "Urology",
+        "Robotic Surgery",
+        "Bariatric Surgery"
+      ]
+    },
+    "4_why_choose_ascendion": {
+      "description": "Short paragraph + infographic with hospital stats.",
+      "stats": ["Hospitals", "Doctors", "Clinics", "Diagnostic Centres", "Pharmacies"]
+    },
+    "5_surgery_or_procedure_info": {
+      "description": "Section on treatment transparency and trusted surgeons.",
+      "specialties": ["Cardiology", "Oncology", "Urology", "Gastroenterology", "Neurology"]
+    },
+    "6_featured_specialty": {
+      "example": "Cardiology",
+      "highlight_location": "Ascendion Chennai",
+      "description": "Highlight Chennai centre with advanced cardiac care and a 'Book Consultation' button."
+    },
+    "7_appointment_form": {
+      "fields": ["Name", "Contact", "City", "Department", "Date"]
+    },
+    "8_testimonials": {
+      "description": "Carousel of patient stories and reviews with photos."
+    },
+    "9_footer": {
+      "details": {
+        "contact_info": "Address, phone, and email",
+        "quick_links": ["About", "Careers", "Privacy Policy", "Terms"],
+        "social_media": ["Facebook", "Instagram", "YouTube", "LinkedIn"],
+        "copyright": "© 2025 Ascendion Hospitals. All Rights Reserved."
+      }
+    }
+  },
+  "audio_assistant": {
+    "features": [
+      "Narrates each section when hovered or clicked.",
+      "Warm, professional, calm voice.",
+      "Option to mute or replay.",
+      "Background: soft hospital-themed instrumental."
+    ]
+  },
+  "image_style": {
+    "description": "Clean, bright, and professional hospital visuals with doctors, patients, and modern equipment."
+  }
+}

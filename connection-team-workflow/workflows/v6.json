@@ -1,0 +1,341 @@
+{
+  "name": "v6",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ],
+          "sender": "anaynikam268@gmail.com"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "name": "Gmail Trigger – Meetly Transcripts",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e4354fcb-5dda-4a92-b582-467e3a10e287",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6BP10nyNQl8szZCI",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sourceKey": "attachment_0",
+        "options": {}
+      },
+      "name": "Move Binary Data (Binary→JSON)",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        192,
+        0
+      ],
+      "id": "69ea8818-a498-4487-b4c6-ae7f61bed944"
+    },
+    {
+      "parameters": {
+        "language": "python",
+        "pythonCode": "for item in _input.all():\n  item.json.myNewField = 1\nreturn _input.all()"
+      },
+      "name": "Parse JSON Attachment (Cloud-Safe)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        368,
+        0
+      ],
+      "id": "e7d08bdd-8ed7-45ee-831e-3a6d12c0ec07"
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "websiteApiUrl",
+              "value": "https://subbuu.app.n8n.cloud/webhook/receive-usecase"
+            },
+            {
+              "name": "logApiUrl",
+              "value": "https://68x38l87uj.execute-api.ap-south-1.amazonaws.com/prod/log"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Workflow Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 1,
+      "position": [
+        576,
+        160
+      ],
+      "id": "c0d0ce2d-5ace-40a4-b34f-c09d8135a67d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an intelligent website analyzer working in the Connection Team.\n\nYou receive structured JSON input that describes a website use case (e.g., hospital, restaurant, education platform, e-commerce, NGO, or corporate site).\n\nYour job is to:\n1. Detect the main domain or topic of the website based on its title, sections, and keywords.\n2. Summarize the website’s purpose.\n3. Produce a standardized “website instruction JSON” that can be sent directly to the Website Building Team.\n\n🔒 Title rule:\nIf the input JSON already includes a title or business_name, keep it EXACTLY as written — do not shorten, modify, or reformat.\n\n🧩 Domain detection guidance:\n- If words like “menu”, “chef”, “dining”, “food”, “restaurant”, or “reservation” appear → topic = “Restaurant”.\n- If words like “hospital”, “doctor”, “patient”, “healthcare”, or “medical” → topic = “Hospital”.\n- If words like “course”, “education”, “student”, “learning”, “academy” → topic = “Education”.\n- If words like “product”, “shop”, “cart”, “store”, “e-commerce” → topic = “E-commerce”.\n- If unclear, set topic = “Business/Organization”.\n\n🧱 Output rules:\n- Return only valid JSON (no explanations, markdown, or code fences).\n- If some details are missing, infer reasonable defaults.\n- Keep section names descriptive but concise.\n- Always include 3–6 relevant images in “images_required”.\n\n✅ Output Format:\n\n{\n  \"mode\": \"website_instruction\",\n  \"topic\": \"<detected website topic>\",\n  \"summary\": \"<one-sentence overview>\",\n  \"website\": {\n    \"title\": \"<exact title from input>\",\n    \"theme\": \"<color scheme or design style>\",\n    \"sections\": [\n      { \"name\": \"<section name>\", \"details\": \"<brief description>\" }\n    ],\n    \"images_required\": [\n      \"<list of image ideas>\"\n    ]\n  }\n}\n\nInput JSON:\n{{$json}}\n",
+        "options": {}
+      },
+      "name": "AI Agent – Analyze Transcript / JSON",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        816,
+        160
+      ],
+      "id": "c235512d-49a5-4739-ab20-0b27231d4f34",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "functionCode": "// Step 1: Extract the raw string from AI output\nlet raw = $json.output || $json.text || $json.data || JSON.stringify($json);\n\n// Step 2: Find and extract only the JSON portion\nconst firstBrace = raw.indexOf('{');\nconst lastBrace = raw.lastIndexOf('}');\nif (firstBrace === -1 || lastBrace === -1) {\n  return [{ json: { error: 'No JSON block found in AI output', raw_output: raw } }];\n}\nconst jsonString = raw.slice(firstBrace, lastBrace + 1);\n\n// Step 3: Parse the extracted JSON safely\nlet parsed;\ntry {\n  parsed = JSON.parse(jsonString);\n} catch (err) {\n  return [{ json: { error: 'Invalid JSON format', details: err.message, raw_json: jsonString } }];\n}\n\n// Step 4: Extract the fields\nconst website = parsed.website || {};\nconst topicRaw = parsed.topic || '';\nconst title = website.title || parsed.title || 'Unnamed Website';\nconst sections = (website.sections || []).map(s => s.name || '').filter(Boolean);\n\n// Step 5: Normalize the topic\nlet website_type = topicRaw.toLowerCase();\nif (website_type.includes('hospital') || website_type.includes('healthcare')) website_type = 'hospital';\nelse if (website_type.includes('education')) website_type = 'education';\nelse if (website_type.includes('restaurant')) website_type = 'restaurant';\nelse website_type = 'business';\n\n// Step 6: Build final Website API payload\nconst result = {\n  website_type,\n  business_name: title,\n  sections_required: sections\n};\n\n// Step 7: Return\nreturn [{ json: result }];"
+      },
+      "name": "Clean & Parse AI JSON",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        1104,
+        160
+      ],
+      "id": "f68a29af-be78-496f-b1bc-b2e57bc96687"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle nested response arrays safely\nlet data;\n\n// Detect different nesting formats\nif (Array.isArray($json) && Array.isArray($json[0])) {\n  // Double nested: [ [ {...} ] ]\n  data = $json[0][0];\n} else if (Array.isArray($json) && typeof $json[0] === 'object') {\n  // Single nested: [ {...} ]\n  data = $json[0];\n} else {\n  // Flat object\n  data = $json;\n}\n\n// Extract arrays\nconst imageRequests = data.images_needed || [];\nconst voiceScripts = data.voice_scripts_needed || [];\n\n// Prepare email subject and body\nlet subject = \"Connection Team – Website Asset Requirements\";\nlet body = \"\";\n\n// 🖼️ Section 1: Image Requests\nif (imageRequests.length > 0) {\n  const imageList = imageRequests\n    .map((req, i) => `${i + 1}. Section: ${req.id}\\n   Description: ${req.description}`)\n    .join('\\n\\n');\n  body += `The website team requires the following images:\\n\\n${imageList}\\n\\n`;\n} else {\n  body += \"No image requests received from the website team.\\n\\n\";\n}\n\n// 🎙️ Section 2: Voice Scripts\nif (voiceScripts.length > 0) {\n  body += \"Voice scripts required for the website sections:\\n\\n\";\n  const scriptList = voiceScripts\n    .map(v => `Section: ${v.id}\\nScript: ${v.script}`)\n    .join('\\n\\n');\n  body += `${scriptList}\\n\\n`;\n} else {\n  body += \"No voice scripts received from the website team.\\n\\n\";\n}\n\n// ✉️ Add footer\nbody += \"Please prepare and send the requested assets to the design team.\";\n\n// ✅ Always return a valid n8n JSON object\nreturn [\n  {\n    json: {\n      subject,\n      body\n    }\n  }\n];\n"
+      },
+      "name": "Convert JSON to Plain Text (Image Request)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1568,
+        160
+      ],
+      "id": "430c21c3-af6e-4cd7-ae51-fdcd73d7baa6"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.body }}",
+        "toList": [
+          "abhineshlakshmapuram20@gmail.com"
+        ],
+        "additionalFields": {}
+      },
+      "name": "Send Email to Meetly (Gmail)",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 1,
+      "position": [
+        1808,
+        160
+      ],
+      "id": "7545444f-45d1-45e1-8dd5-5148aa469781",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "6BP10nyNQl8szZCI",
+          "name": "Gmail account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{ $json.logApiUrl || 'https://68x38l87uj.execute-api.ap-south-1.amazonaws.com/prod/log' }}",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{ JSON.stringify({\n  executionId: $execution.id,\n  workflowName: $workflow.name || 'Connection-Team-Workflow',\n  timestamp: new Date().toISOString(),\n  website_type: $json.website_type || 'unknown',\n  business_name: $json.business_name || 'unknown',\n  bedrock_model: $json.model || 'anthropic.claude-3-5-sonnet-20240620-v1:0',\n  ai_output_summary: $json.output || $json.summary || '',\n  ai_tokens_used: $json.tokensUsed || 0,\n  status: 'completed',\n  raw_payload: $json\n}) }}\n",
+        "headerParametersJson": "{ \"Content-Type\": \"application/json\" }"
+      },
+      "name": "Log to DynamoDB (HTTP)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        2048,
+        160
+      ],
+      "id": "f3edf7f6-7790-4b2b-92d4-a3b3d72c38fb"
+    },
+    {
+      "parameters": {
+        "model": "anthropic.claude-3-5-sonnet-20240620-v1:0",
+        "options": {
+          "maxTokensToSample": 5000,
+          "temperature": 0.7
+        }
+      },
+      "name": "AWS Bedrock Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAwsBedrock",
+      "typeVersion": 1,
+      "position": [
+        768,
+        384
+      ],
+      "id": "b1022eb5-070a-4adf-99f0-0da808b8f7ec",
+      "credentials": {
+        "aws": {
+          "id": "zrxZ63C7GsEzAsx4",
+          "name": "AWS account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "requestMethod": "POST",
+        "url": "={{ $json.websiteApiUrl || 'https://subbuu.app.n8n.cloud/webhook/receive-usecase' }}",
+        "jsonParameters": true,
+        "options": {},
+        "bodyParametersJson": "={{$json}}"
+      },
+      "name": "Send to Website API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        1344,
+        160
+      ],
+      "id": "fae7ab96-e727-4f01-b81a-e2f1ab936ca0"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Gmail Trigger – Meetly Transcripts": {
+      "main": [
+        [
+          {
+            "node": "Move Binary Data (Binary→JSON)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Binary Data (Binary→JSON)": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON Attachment (Cloud-Safe)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON Attachment (Cloud-Safe)": {
+      "main": [
+        [
+          {
+            "node": "Workflow Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Workflow Config": {
+      "main": [
+        [
+          {
+            "node": "AI Agent – Analyze Transcript / JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent – Analyze Transcript / JSON": {
+      "main": [
+        [
+          {
+            "node": "Clean & Parse AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean & Parse AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Send to Website API",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert JSON to Plain Text (Image Request)": {
+      "main": [
+        [
+          {
+            "node": "Send Email to Meetly (Gmail)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email to Meetly (Gmail)": {
+      "main": [
+        [
+          {
+            "node": "Log to DynamoDB (HTTP)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AWS Bedrock Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent – Analyze Transcript / JSON",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Website API": {
+      "main": [
+        [
+          {
+            "node": "Convert JSON to Plain Text (Image Request)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "091cca06-10bb-4a2a-a121-dcaf351a8f25",
+  "meta": {
+    "instanceId": "b39d19a54a866bc588cc8453c30b291e221a08fcba90c0bf6ab0d089e2f7d7a6"
+  },
+  "id": "JUEt47knnGVw8cB2",
+  "tags": []
+}

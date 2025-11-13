@@ -1,0 +1,70 @@
+{
+  "title": "Saffron Spice Bistro – A Culinary Journey of Authentic Indian Flavors",
+  "website_overview": "A warm, inviting restaurant website featuring elegant design, high-quality food imagery, an interactive menu, and an AI-driven reservation assistant that helps customers book tables effortlessly.",
+  "main_goals": [
+    "Showcase restaurant ambiance and authenticity.",
+    "Display an interactive menu with pricing and chef recommendations.",
+    "Enable customers to book reservations easily.",
+    "Highlight chef specialties and customer testimonials.",
+    "Provide location and contact details clearly."
+  ],
+  "website_sections": {
+    "1_header": {
+      "details": {
+        "logo_position": "Top Left",
+        "contact": "📞 +91 9876543210",
+        "button": "Reserve a Table",
+        "menu": ["Home", "Menu", "About Us", "Gallery", "Reservations", "Contact"]
+      }
+    },
+    "2_hero_section": {
+      "banner_image": "Restaurant interior or dish photo",
+      "headline_text": "Experience Authentic Indian Cuisine with a Modern Twist",
+      "elements": ["Book Table Button", "Explore Menu Button"]
+    },
+    "3_special_dishes": {
+      "description": "Showcase the top 5 signature dishes with high-quality images and descriptions.",
+      "dishes": [
+        "Butter Chicken",
+        "Paneer Tikka",
+        "Hyderabadi Biryani",
+        "Masala Dosa",
+        "Gulab Jamun"
+      ]
+    },
+    "4_about_us": {
+      "description": "A short story about the restaurant’s origin, vision, and dedication to culinary excellence."
+    },
+    "5_chef_highlight": {
+      "description": "Feature the head chef with a photo and a quote about their cooking philosophy."
+    },
+    "6_gallery": {
+      "description": "Grid layout of food, interior, and guest experience photos."
+    },
+    "7_customer_reviews": {
+      "description": "Carousel of customer testimonials with star ratings."
+    },
+    "8_reservation_form": {
+      "fields": ["Name", "Contact", "Date", "Time", "Number of Guests"]
+    },
+    "9_footer": {
+      "details": {
+        "contact_info": "Address, phone, and email",
+        "quick_links": ["Menu", "Events", "Privacy Policy", "Careers"],
+        "social_media": ["Facebook", "Instagram", "YouTube", "TripAdvisor"],
+        "copyright": "© 2025 Saffron Spice Bistro. All Rights Reserved."
+      }
+    }
+  },
+  "audio_assistant": {
+    "features": [
+      "Greets visitors with a warm tone and explains key sections.",
+      "Helps navigate to the menu or reservation form via voice commands.",
+      "Uses a friendly, enthusiastic restaurant host voice.",
+      "Option to mute or replay sections."
+    ]
+  },
+  "image_style": {
+    "description": "Rich, vibrant, and mouth-watering food photography with ambient lighting of restaurant interiors."
+  }
+}
