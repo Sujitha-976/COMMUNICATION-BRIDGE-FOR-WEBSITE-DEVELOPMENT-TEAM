@@ -13,6 +13,7 @@ automation.
 
 ## Features
 
+
 ✅ Automatic Gmail trigger for new transcripts
 ✅ AI-based transcript analysis (AWS Bedrock – Claude 3.5 Sonnet)
 ✅ Converts outputs to structured “website instruction JSON”
@@ -20,6 +21,7 @@ automation.
 ✅ Converts website team responses (images/voice scripts) into plain text email
 ✅ Sends formatted email back to Meetly Team
 ✅ Logs entire execution (AI output, metadata, timestamps) into AWS DynamoDB
+
 
 ## Technologies and Tools Used
 
@@ -104,7 +106,7 @@ Before running this project, ensure the following are set up:
 
 ### Step 1: Clone the Repository
 
-```bash
+
 git clone https://github.com/<your-username>/communication-bridge-workflow.git
 cd communication-bridge-workflow
 
@@ -185,7 +187,7 @@ Website response → Converted to plain text → Email sent to Meetly team
 
 Execution details logged to AWS DynamoDB
 
-You can view logs either in:
+### You can view logs either in:
 
 AWS DynamoDB Table
 
